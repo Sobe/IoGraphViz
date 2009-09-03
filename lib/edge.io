@@ -11,4 +11,10 @@ Edge := Object clone do(
   attributeAt := method(attribute,
     attr at(attribute)
   )
+  
+  with := method(from, to, parent,
+    nodeFrom = from
+    nodeTo = to
+    parentGraph = parent
+  )
 )

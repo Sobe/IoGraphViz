@@ -65,9 +65,9 @@ IoGraphViz := Object clone do(
         )
         
       ,
-        newEdge := Edge clone do(
-          nodeFrom = nSource
-          nodeTo = nTarget
+        newEdge := Edge clone with(
+          nodeFrom = nSource,
+          nodeTo = nTarget,
           parentGraph = self
         )
         eOptions ifNonNil(
@@ -85,6 +85,8 @@ IoGraphViz := Object clone do(
     addedEdges
   )
   
+  nodesCount := method(nodes size)
+  edgesCount := method(edges size)
   
   
   
