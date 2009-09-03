@@ -11,4 +11,10 @@ Node := Object clone do(
     attr at(attribute)
   )
   
+  with := method(nam, parent,
+    name = nam
+    parentGraph = parent
+    self
+  )
+  
 )
