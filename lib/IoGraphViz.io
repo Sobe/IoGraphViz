@@ -1,10 +1,11 @@
 Node
 Edge
+Constants
 
 # 
 IoGraphViz := Object clone do(
   
-  name := "Graph"
+  name := "G"
   fileName := "out"
   format := "canon"
   prog := "dot"
@@ -30,11 +31,12 @@ IoGraphViz := Object clone do(
   #~ @edge  = GraphViz::Attrs::new( self, "edge",  EDGESATTRS  )
   #~ @graph = GraphViz::Attrs::new( self, "graph", GRAPHSATTRS )
   
+  "bp2" println
   
   # Add a new node to self
   # Return added node
   addNode := method(nodeName, nOptions,
-    newNode := Node clone with(name = nodeName, parentGraph = self)
+    newNode := Node clone with(nodeName, self name)
     nOptions ifNonNil(
       nOptions foreach(k, v, 
         newNode setAttribute(k, v)
@@ -66,9 +68,9 @@ IoGraphViz := Object clone do(
         
       ,
         newEdge := Edge clone with(
-          nodeFrom = nSource,
-          nodeTo = nTarget,
-          parentGraph = self
+          nSource,
+          nTarget,
+          self name
         )
         eOptions ifNonNil(
           eOptions foreach(k, v, 
@@ -82,15 +84,124 @@ IoGraphViz := Object clone do(
       )
     )
     
-    addedEdges
+    return(addedEdges)
   )
   
   nodesCount := method(nodes size)
+  
   edgesCount := method(edges size)
   
-  
-  
-  
+  # Generate the graph
+  #
+  # Options:
+  #   'output'  => output format
+  #   'file'    => output file name
+  #   'use'     => GraphViz program to use
+  #   'path'    => program path
+  #
+  output := method(options,
+    "bp5" println
+    dotScript := ""
+    lastType := nil
+    separator := ""
+    data := ""
+    
+    elements foreach(elt,
+      if((lastType isNil) or (lastType != elt type),
+        
+        if(data size > 0,
+          lastType switch(
+            # TODO case "graph"
+            "Node",
+              dotScript = dotScript .. "  node [" .. data .. "];\n",
+            "Edge",
+              dotScript = dotScript .. "  edge [" .. data .. "];\n"
+          )
+        )
+        
+      )
+      
+      lastType = elt type
+      
+      # TODO if necessary: check value is not nil (raise error)
+      
+      elt type switch(
+        # TODO attr cases
+        "Node",
+          elt type println
+          dotScript = dotScript .. "  " .. elt outputNode() .. "\n"
+        "Edge",
+          elt type println
+          dotScript = dotScript .. "  " .. elt outputEdge(graphType) .. "\n",
+        # ELSE
+          Exception raise("Unknow element type")
+      )
+    )
+    
+    if(data size > 0,
+      # TODO switch *_attr
+      nil
+    )
+    dotScript = dotScript .. "}"
+    
+    "bp5.5" println
+    
+    if(parentGraph isNil == false,
+      dotScript = "subgraph " .. self name .. " {\n" .. dotScript
+      #return(dotScript) #=> plain B$
+      dotScript
+    ,
+      if(options isNil == false,
+        options foreach(k, v,
+          k switch(
+            "output",
+              if(Constants Formats contains(v) == false,
+                Exception raise("Output format " .. v .. " is invalid")
+              )
+              format = v,
+            "file",
+              fileName = v,
+            "use",
+              if(Programs contains(v) == false,
+                Exception raise("Can't use '" .. v .. "'")
+              )
+              prog = v,
+            "path",
+              path = v,
+            # ELSE
+              Exception raise("Option '" .. v .. "' unknow" )
+          )
+        )
+      )
+    )
+    
+    ("bp7 self name " .. self name) println
+    
+    dotScript = graphType .. " " .. self name .. " {\n" .. dotScript
+    
+    ("bp6: format = " .. format) println
+    if(self format != "none",
+      # Save script and send it to dot
+      #t := File temporaryFile openForUpdating("./temp.dot")
+      t := File openForUpdating("./temp.dot")
+      t write(dotScript)
+      
+      # TODO implements findExecutable()
+      cmd := "\"C:/Program Files/Graphviz2.18/Bin/dot\""
+      
+      phyl := ""
+      phyl = if(fileName isNil == false, "-o " .. fileName)
+      xCmd := cmd .. " -T" .. format .. " " .. phyl .. " " .. t path
+      "bp before system call" println
+      System system(xCmd) println
+      
+      
+      # Clean file
+      t close
+    ,
+      dotScript print
+    )
+  )
 
 )
 
