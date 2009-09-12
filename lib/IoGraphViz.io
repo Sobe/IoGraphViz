@@ -30,8 +30,7 @@ IoGraphViz := Object clone do(
   #~ @node  = GraphViz::Attrs::new( self, "node",  NODESATTRS  )
   #~ @edge  = GraphViz::Attrs::new( self, "edge",  EDGESATTRS  )
   #~ @graph = GraphViz::Attrs::new( self, "graph", GRAPHSATTRS )
-  
-  "bp2" println
+
   
   # Add a new node to self
   # Return added node
@@ -100,7 +99,6 @@ IoGraphViz := Object clone do(
   #   'path'    => program path
   #
   output := method(options,
-    "bp5" println
     dotScript := ""
     lastType := nil
     separator := ""
@@ -144,8 +142,6 @@ IoGraphViz := Object clone do(
     )
     dotScript = dotScript .. "}"
     
-    "bp5.5" println
-    
     if(parentGraph isNil == false,
       dotScript = "subgraph " .. self name .. " {\n" .. dotScript
       #return(dotScript) #=> plain B$
@@ -168,18 +164,15 @@ IoGraphViz := Object clone do(
               prog = v,
             "path",
               path = v,
-            # ELSE
+            # DEFAULT
               Exception raise("Option '" .. v .. "' unknow" )
           )
         )
       )
     )
     
-    ("bp7 self name " .. self name) println
-    
     dotScript = graphType .. " " .. self name .. " {\n" .. dotScript
     
-    ("bp6: format = " .. format) println
     if(self format != "none",
       # Save script and send it to dot
       #t := File temporaryFile openForUpdating("./temp.dot")
@@ -192,7 +185,6 @@ IoGraphViz := Object clone do(
       phyl := ""
       phyl = if(fileName isNil == false, "-o " .. fileName)
       xCmd := cmd .. " -T" .. format .. " " .. phyl .. " " .. t path
-      "bp before system call" println
       System system(xCmd) println
       
       
