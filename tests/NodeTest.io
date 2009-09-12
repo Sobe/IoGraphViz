@@ -6,7 +6,7 @@ NodeTest := UnitTest clone do(
     nod := Node clone
     nod setAttribute("attr", 42)
 		assertEquals(nod attributeAt("attr"), 
-                 Node clone do(attr atPut("attr", 42)) attributeAt("attr"))
+                 Node clone do(attrNode atPut("attr", 42)) attributeAt("attr"))
 	)
   
 )
