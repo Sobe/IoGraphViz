@@ -1,5 +1,6 @@
 Node := Object clone do(
-  name := ""
+  name := nil
+  # GV attributes
   attrNode := Map clone
   parentGraph := nil
   
@@ -11,11 +12,30 @@ Node := Object clone do(
     attrNode at(attribute)
   )
   
+  << := method(aNode,
+    if(aNode isKindOf(List),
+      aNode foreach(nod,
+        self <<(nod)
+      )
+    ,
+      # TODO check if parentGraphs are the same one
+      aNode parentGraph addEdge(self, aNode)
+    )
+  )
+  
+  #
+  # Initialize main attributes
+  #
+  # nam     =>  Node name
+  # parent  =>  Parent graph
+  #
   with := method(nam, parent,
     name = nam
     parentGraph = parent
     self
   )
+  
+  
   
   outputNode := method(
     out := "" .. name
