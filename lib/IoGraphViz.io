@@ -25,15 +25,19 @@ IoGraphViz := Object clone do(
   #~ @loEdges  = Array::new()
   #~ @hoGraphs = Hash::new()
     
-    
   # TODO handle that
   #~ @node  = GraphViz::Attrs::new( self, "node",  NODESATTRS  )
   #~ @edge  = GraphViz::Attrs::new( self, "edge",  EDGESATTRS  )
   #~ @graph = GraphViz::Attrs::new( self, "graph", GRAPHSATTRS )
 
   
-  # Add a new node to self
-  # Return added node
+  with := method(name,
+    name = graphName
+  )
+  
+  # Add a new named node to self
+  #
+  # return added node
   addNode := method(nodeName, nOptions,
     newNode := Node clone with(nodeName, self name)
     nOptions ifNonNil(
@@ -48,7 +52,9 @@ IoGraphViz := Object clone do(
   )
   
   # Add a new edge to self
-  # nSource and nTarget can be single nodes or nodes lists
+  #
+  # nSource can be a single node or a nodes list
+  # nTarget can be a single node or a nodes list
   # return added edge
   addEdge := method(nSource, nTarget, eOptions,
     
@@ -84,6 +90,19 @@ IoGraphViz := Object clone do(
     )
     
     return(addedEdges)
+  )
+  
+  #
+  # Add a new Graph to current one
+  #
+  # graphName   => graph name
+  # gOptions    => GraphViz option for this graph
+  #
+  addGraph := method(graphName, gOptions,
+    newGraph := IoGraphViz clone with(graphName)
+    graphs atPut(graphName, newGraph)
+    
+    newGraph
   )
   
   nodesCount := method(nodes size)
