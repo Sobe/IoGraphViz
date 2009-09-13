@@ -19,7 +19,8 @@ parse := gv addNode("parse")
 execute := gv addNode("execute", nil)
 init := gv addNode("init", nil)
 cleanup := gv addNode("cleanup", nil)
-makeString := gv addNode("make_string", Map clone do(atPut("label", "make a\nstring")))
+# TODO use 'make a\nstring' as label
+makeString := gv addNode("make_string", Map clone do(atPut("label", "make a string")))
 printf := gv addNode("printf", nil)
 compare := gv addNode("compare", Map clone do(
   atPut("shape", "box")
@@ -48,4 +49,4 @@ options := Map clone do(
 
 gv output(options)
 
-"END OF SAMPLE2"
+"END OF SAMPLE2" println
