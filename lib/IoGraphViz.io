@@ -5,7 +5,7 @@ Constants
 # 
 IoGraphViz := Object clone do(
   
-  name := "G"
+  graphName := "G"
   fileName := "out"
   format := "canon"
   prog := "dot"
@@ -32,14 +32,16 @@ IoGraphViz := Object clone do(
 
   
   with := method(name,
-    name = graphName
+    graphName = name
+    self
   )
   
+  #
   # Add a new named node to self
   #
   # return added node
   addNode := method(nodeName, nOptions,
-    newNode := Node clone with(nodeName, self name)
+    newNode := Node clone with(nodeName, self graphName)
     nOptions ifNonNil(
       nOptions foreach(k, v, 
         newNode setAttribute(k, v)
@@ -75,7 +77,7 @@ IoGraphViz := Object clone do(
         newEdge := Edge clone with(
           nSource,
           nTarget,
-          self name
+          self graphName
         )
         eOptions ifNonNil(
           eOptions foreach(k, v, 
@@ -98,9 +100,9 @@ IoGraphViz := Object clone do(
   # graphName   => graph name
   # gOptions    => GraphViz option for this graph
   #
-  addGraph := method(graphName, gOptions,
-    newGraph := IoGraphViz clone with(graphName)
-    graphs atPut(graphName, newGraph)
+  addGraph := method(gName, gOptions,
+    newGraph := IoGraphViz clone with(gName)
+    graphs atPut(gName, newGraph)
     
     newGraph
   )
@@ -145,10 +147,8 @@ IoGraphViz := Object clone do(
       elt type switch(
         # TODO attr cases
         "Node",
-          elt type println
           dotScript = dotScript .. "  " .. elt outputNode() .. "\n"
         "Edge",
-          elt type println
           dotScript = dotScript .. "  " .. elt outputEdge(graphType) .. "\n",
         # ELSE
           Exception raise("Unknow element type")
@@ -162,7 +162,7 @@ IoGraphViz := Object clone do(
     dotScript = dotScript .. "}"
     
     if(parentGraph isNil == false,
-      dotScript = "subgraph " .. self name .. " {\n" .. dotScript
+      dotScript = "subgraph " .. self graphName .. " {\n" .. dotScript
       #return(dotScript) #=> plain B$
       dotScript
     ,
@@ -190,7 +190,7 @@ IoGraphViz := Object clone do(
       )
     )
     
-    dotScript = graphType .. " " .. self name .. " {\n" .. dotScript
+    dotScript = graphType .. " " .. self graphName .. " {\n" .. dotScript
     
     if(self format != "none",
       # Save script and send it to dot
