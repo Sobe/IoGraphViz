@@ -29,12 +29,49 @@ IoGraphViz := Object clone do(
   #~ @node  = GraphViz::Attrs::new( self, "node",  NODESATTRS  )
   #~ @edge  = GraphViz::Attrs::new( self, "edge",  EDGESATTRS  )
   #~ @graph = GraphViz::Attrs::new( self, "graph", GRAPHSATTRS )
-
+  attrGraph := Map clone
+  attrNode := Map clone
+  attrEdge := Map clone
   
   with := method(name,
     graphName = name
     self
   )
+  
+  #
+  # Set a graph attribute
+  #
+  setAttribute := method(attribute, value,
+    attrGraph atPut(attribute, value)
+  )
+  
+  # Get graph attribute
+  #
+  #
+  attributeAt := method(attribute,
+    attrGraph at(attribute)
+  )
+  
+  #
+  # Accessors for nodes attributes
+  #
+  setNodeAttr := method(attribute, value,
+    attrNode atPut(attribute, value)
+  )
+  nodeAttrAt := method(attribute,
+    attrNode at(attribute)
+  )
+
+  #
+  # Accessors for edges attributes
+  #
+  setEdgeAttr:= method(attribute, value,
+    attrEdge atPut(attribute, value)
+  )
+  edgeAttrAt := method(attribute,
+    attrEdge at(attribute)
+  )
+  
   
   #
   # Add a new named node to self
@@ -107,10 +144,17 @@ IoGraphViz := Object clone do(
     newGraph
   )
   
+  #
+  # Number of nodes
+  #
   nodesCount := method(nodes size)
   
+  #
+  # Number of edges
+  #
   edgesCount := method(edges size)
   
+  #
   # Generate the graph
   #
   # Options:
@@ -130,7 +174,8 @@ IoGraphViz := Object clone do(
         
         if(data size > 0,
           lastType switch(
-            # TODO case "graph"
+            "IoGraphViz",
+              dotScript = dotScript .. "  " .. data .. ";\n"
             "Node",
               dotScript = dotScript .. "  node [" .. data .. "];\n",
             "Edge",
@@ -138,16 +183,19 @@ IoGraphViz := Object clone do(
           )
         )
         
+        separator = ""
+        data = ""
       )
       
       lastType = elt type
       
       # TODO if necessary: check value is not nil (raise error)
-      
+
       elt type switch(
-        # TODO attr cases
+        "IoGraphViz",
+          dotScript = dotScript .. "  " .. elt output() .. "\n",
         "Node",
-          dotScript = dotScript .. "  " .. elt outputNode() .. "\n"
+          dotScript = dotScript .. "  " .. elt outputNode() .. "\n",
         "Edge",
           dotScript = dotScript .. "  " .. elt outputEdge(graphType) .. "\n",
         # ELSE
@@ -194,9 +242,11 @@ IoGraphViz := Object clone do(
     
     if(self format != "none",
       # Save script and send it to dot
-      #t := File temporaryFile openForUpdating("./temp.dot")
-      t := File openForUpdating("./temp.dot")
+      t := File openForUpdating("./temp.dot") # TODO TemporaryFile
+      #t := File openForUpdating("./temp.dot")
       t write(dotScript)
+      # TODO change this when Temporary file
+      t close
       
       # TODO implements findExecutable()
       cmd := "\"C:/Program Files/Graphviz2.18/Bin/dot\""
@@ -204,11 +254,11 @@ IoGraphViz := Object clone do(
       phyl := ""
       phyl = if(fileName isNil == false, "-o " .. fileName)
       xCmd := cmd .. " -T" .. format .. " " .. phyl .. " " .. t path
-      System system(xCmd) println
+      System system(xCmd) #println
       
       
       # Clean file
-      t close
+      #t close
     ,
       dotScript print
     )
