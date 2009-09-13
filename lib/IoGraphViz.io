@@ -140,6 +140,12 @@ IoGraphViz := Object clone do(
   addGraph := method(gName, gOptions,
     newGraph := IoGraphViz clone with(gName)
     graphs atPut(gName, newGraph)
+    elements append(newGraph)
+    
+    # TOD gOptions ???
+    gOptions foreach(k, v,
+      newGraph setAttribute(k, v)
+    )
     
     newGraph
   )
@@ -198,6 +204,10 @@ IoGraphViz := Object clone do(
           dotScript = dotScript .. "  " .. elt outputNode() .. "\n",
         "Edge",
           dotScript = dotScript .. "  " .. elt outputEdge(graphType) .. "\n",
+        # TODO seggregate by attr type (lil differences)
+        "Map", # case attributes
+          data = data .. separator .. elt name .. " = \"" .. elt .. "\""
+          separator = ", ",
         # ELSE
           Exception raise("Unknow element type")
       )
