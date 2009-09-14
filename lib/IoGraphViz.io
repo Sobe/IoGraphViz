@@ -1,8 +1,15 @@
+# Some kind of big license should be here
+
 Node
 Edge
 Constants
+doRelativeFile("attr.io")
 
-# 
+
+
+#
+# TODO Comment
+#
 IoGraphViz := Object clone do(
   
   graphName := "G"
@@ -25,13 +32,12 @@ IoGraphViz := Object clone do(
   #~ @loEdges  = Array::new()
   #~ @hoGraphs = Hash::new()
     
-  # TODO handle that
   #~ @node  = GraphViz::Attrs::new( self, "node",  NODESATTRS  )
   #~ @edge  = GraphViz::Attrs::new( self, "edge",  EDGESATTRS  )
   #~ @graph = GraphViz::Attrs::new( self, "graph", GRAPHSATTRS )
-  attrGraph := Map clone
-  attrNode := Map clone
-  attrEdge := Map clone
+  attrGraph := GraphAttr clone
+  attrNode := NodeAttr clone
+  attrEdge := EdgeAttr clone
   
   with := method(name,
     graphName = name
@@ -39,15 +45,12 @@ IoGraphViz := Object clone do(
   )
   
   #
-  # Set a graph attribute
+  # Accessors for graphes attributes
   #
   setAttribute := method(attribute, value,
     attrGraph atPut(attribute, value)
+    elements append(GraphAttr clone with(attribute, value))
   )
-  
-  # Get graph attribute
-  #
-  #
   attributeAt := method(attribute,
     attrGraph at(attribute)
   )
@@ -57,6 +60,7 @@ IoGraphViz := Object clone do(
   #
   setNodeAttr := method(attribute, value,
     attrNode atPut(attribute, value)
+    elements append(NodeAttr clone with(attribute, value))
   )
   nodeAttrAt := method(attribute,
     attrNode at(attribute)
@@ -67,6 +71,7 @@ IoGraphViz := Object clone do(
   #
   setEdgeAttr:= method(attribute, value,
     attrEdge atPut(attribute, value)
+    elements append(EdgeAttr clone with(attribute, value))
   )
   edgeAttrAt := method(attribute,
     attrEdge at(attribute)
@@ -195,7 +200,8 @@ IoGraphViz := Object clone do(
       
       lastType = elt type
       
-      # TODO if necessary: check value is not nil (raise error)
+      # Check element is non nil
+      if(elt isNil, Exception raise("Found empty element."))
 
       elt type switch(
         "IoGraphViz",
@@ -204,18 +210,31 @@ IoGraphViz := Object clone do(
           dotScript = dotScript .. "  " .. elt outputNode() .. "\n",
         "Edge",
           dotScript = dotScript .. "  " .. elt outputEdge(graphType) .. "\n",
-        # TODO seggregate by attr type (lil differences)
-        "Map", # case attributes
-          data = data .. separator .. elt name .. " = \"" .. elt .. "\""
+        # TODO Refactor here
+        "GraphAttr",
+          data = data .. separator .. elt keys at(0) .. " = \"" .. elt at(elt keys at(0)) .. "\""
+          separator = "; ",
+        "NodeAttr",
+          data = data .. separator .. elt keys at(0) .. " = \"" .. elt at(elt keys at(0)) .. "\""
+          separator = ", ",
+        "EdgeAttr",
+          data = data .. separator .. elt keys at(0) .. " = \"" .. elt at(elt keys at(0)) .. "\""
           separator = ", ",
         # ELSE
-          Exception raise("Unknow element type")
+          Exception raise("Unknow element type: " .. elt type)
       )
     )
     
     if(data size > 0,
       # TODO switch *_attr
-      nil
+      lastType switch(
+        "GraphAttr",
+          dotScript = dotScript .. "  " .. data .. ";\n",
+        "NodeAttr",
+          dotScript = dotScript .. "  node [" .. data .. "];\n",
+        "EdgeAttr",
+          dotScript = dotScript .. "  edge [" .. data .. "];\n"
+      )
     )
     dotScript = dotScript .. "}"
     
@@ -275,7 +294,3 @@ IoGraphViz := Object clone do(
   )
 
 )
-
-#writeln(IoGraphViz edges)
-
-# DOC: docSlot
