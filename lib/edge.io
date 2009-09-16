@@ -1,7 +1,9 @@
+doRelativeFile("attr.io")
+
 Edge := Object clone do(
   nodeFrom := nil
   nodeTo := nil
-  attrEdge := Map clone
+  attrEdge := EdgeAttr clone
   parentGraph := nil
   
   setAttribute := method(attribute, value,

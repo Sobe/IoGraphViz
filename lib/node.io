@@ -1,7 +1,9 @@
+doRelativeFile("attr.io")
+
 Node := Object clone do(
   name := nil
   # GV attributes
-  attrNode := Map clone
+  attrNode := NodeAttr clone
   parentGraph := nil
   
   setAttribute := method(attribute, value,
