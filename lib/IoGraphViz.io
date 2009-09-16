@@ -147,7 +147,6 @@ IoGraphViz := Object clone do(
     graphs atPut(gName, newGraph)
     elements append(newGraph)
     
-    # TOD gOptions ???
     gOptions foreach(k, v,
       newGraph setAttribute(k, v)
     )
@@ -185,11 +184,11 @@ IoGraphViz := Object clone do(
         
         if(data size > 0,
           lastType switch(
-            "IoGraphViz",
+            "GraphAttr",
               dotScript = dotScript .. "  " .. data .. ";\n"
-            "Node",
+            "NodeAttr",
               dotScript = dotScript .. "  node [" .. data .. "];\n",
-            "Edge",
+            "EdgeAttr",
               dotScript = dotScript .. "  edge [" .. data .. "];\n"
           )
         )
@@ -204,12 +203,6 @@ IoGraphViz := Object clone do(
       if(elt isNil, Exception raise("Found empty element."))
 
       elt type switch(
-        "IoGraphViz",
-          dotScript = dotScript .. "  " .. elt output() .. "\n",
-        "Node",
-          dotScript = dotScript .. "  " .. elt outputNode() .. "\n",
-        "Edge",
-          dotScript = dotScript .. "  " .. elt outputEdge(graphType) .. "\n",
         # TODO Refactor here
         "GraphAttr",
           data = data .. separator .. elt keys at(0) .. " = \"" .. elt at(elt keys at(0)) .. "\""
@@ -220,13 +213,19 @@ IoGraphViz := Object clone do(
         "EdgeAttr",
           data = data .. separator .. elt keys at(0) .. " = \"" .. elt at(elt keys at(0)) .. "\""
           separator = ", ",
+        "IoGraphViz",
+          dotScript = dotScript .. "  " .. elt output() .. "\n",
+        "Node",
+          dotScript = dotScript .. "  " .. elt outputNode() .. "\n",
+        "Edge",
+          dotScript = dotScript .. "  " .. elt outputEdge(graphType) .. "\n",
+
         # ELSE
           Exception raise("Unknow element type: " .. elt type)
       )
     )
     
     if(data size > 0,
-      # TODO switch *_attr
       lastType switch(
         "GraphAttr",
           dotScript = dotScript .. "  " .. data .. ";\n",
@@ -239,8 +238,9 @@ IoGraphViz := Object clone do(
     dotScript = dotScript .. "}"
     
     if(parentGraph isNil == false,
+      # Case subgraph
       dotScript = "subgraph " .. self graphName .. " {\n" .. dotScript
-      #return(dotScript) #=> plain B$
+      return(dotScript)
       dotScript
     ,
       if(options isNil == false,
