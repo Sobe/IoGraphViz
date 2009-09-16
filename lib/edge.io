@@ -26,7 +26,7 @@ Edge := Object clone do(
     if(graphType == "graph", link = " -- ")
     
     out := nodeFrom name .. link .. nodeTo name
-    attr :=""
+    attr := ""
     separator := ""
     attrEdge foreach(k, v,
       attr = attr .. separator .. k .. " = \"" .. v .. "\""
