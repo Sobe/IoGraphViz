@@ -2,7 +2,7 @@ IoGraphViz
 
 "BEGINING OF SAMPLE2" println
 
-gv := IoGraphViz clone with("G")
+gv := IoGraphViz clone with("A_Program")
 
 gv setNodeAttr("shape", "ellipse")
 gv setNodeAttr("color", "black")
@@ -15,11 +15,10 @@ gv setEdgeAttr("label", "")
 gv setAttribute("size", "4,4")
 
 main := gv addNode("main", Map clone do(atPut("shape", "box")))
-parse := gv addNode("parse")
+parse := gv addNode("parse", nil)
 execute := gv addNode("execute", nil)
 init := gv addNode("init", nil)
 cleanup := gv addNode("cleanup", nil)
-# TODO use 'make a\nstring' as label
 makeString := gv addNode("make_string", Map clone do(atPut("label", "make a string")))
 printf := gv addNode("printf", nil)
 compare := gv addNode("compare", Map clone do(
