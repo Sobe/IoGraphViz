@@ -35,12 +35,15 @@ IoGraphViz := Object clone do(
   #~ @node  = GraphViz::Attrs::new( self, "node",  NODESATTRS  )
   #~ @edge  = GraphViz::Attrs::new( self, "edge",  EDGESATTRS  )
   #~ @graph = GraphViz::Attrs::new( self, "graph", GRAPHSATTRS )
-  attrGraph := GraphAttr clone
-  attrNode := NodeAttr clone
-  attrEdge := EdgeAttr clone
+  attrGraph := nil
+  attrNode := nil
+  attrEdge := nil
   
   with := method(name,
     graphName = name
+    attrGraph = GraphAttr clone
+    attrNode = NodeAttr clone
+    attrEdge = EdgeAttr clone
     self
   )
   
@@ -173,11 +176,19 @@ IoGraphViz := Object clone do(
   #   'use'     => GraphViz program to use
   #   'path'    => program path
   #
-  output := method(options,
-    dotScript := ""
+  # NOT FUNCTIONAL
+  outputFromRuby := method(options,
+    dotScript := "" # TODO asMutable
     lastType := nil
     separator := ""
     data := ""
+    
+    writeln("attrNode:")
+    writeln(attrNode keys)
+    writeln("attrEdge:")
+    writeln(attrEdge keys)
+    writeln("In elements:")
+    elements foreach(elt, writeln(elt type))
     
     elements foreach(elt,
       if((lastType isNil) or (lastType != elt type),
@@ -187,8 +198,12 @@ IoGraphViz := Object clone do(
             "GraphAttr",
               dotScript = dotScript .. "  " .. data .. ";\n"
             "NodeAttr",
+              writeln("In 1st NodeAttr:")
+              writeln(data)
               dotScript = dotScript .. "  node [" .. data .. "];\n",
             "EdgeAttr",
+              writeln("In 1st EdgeAttr:")
+              writeln(data)
               dotScript = dotScript .. "  edge [" .. data .. "];\n"
           )
         )
@@ -208,18 +223,21 @@ IoGraphViz := Object clone do(
           data = data .. separator .. elt keys at(0) .. " = \"" .. elt at(elt keys at(0)) .. "\""
           separator = "; ",
         "NodeAttr",
+          writeln("In 2nd NodeAttr:")
+          writeln(data)
           data = data .. separator .. elt keys at(0) .. " = \"" .. elt at(elt keys at(0)) .. "\""
           separator = ", ",
         "EdgeAttr",
+          writeln("In 2nd EdgeAttr:")
+          writeln(data)
           data = data .. separator .. elt keys at(0) .. " = \"" .. elt at(elt keys at(0)) .. "\""
           separator = ", ",
-        "IoGraphViz",
-          dotScript = dotScript .. "  " .. elt output() .. "\n",
         "Node",
           dotScript = dotScript .. "  " .. elt outputNode() .. "\n",
         "Edge",
           dotScript = dotScript .. "  " .. elt outputEdge(graphType) .. "\n",
-
+        "IoGraphViz",
+          dotScript = dotScript .. "  " .. elt output() .. "\n",
         # ELSE
           Exception raise("Unknow element type: " .. elt type)
       )
@@ -230,8 +248,12 @@ IoGraphViz := Object clone do(
         "GraphAttr",
           dotScript = dotScript .. "  " .. data .. ";\n",
         "NodeAttr",
+          writeln("In 3rd NodeAttr:")
+          writeln(data)
           dotScript = dotScript .. "  node [" .. data .. "];\n",
         "EdgeAttr",
+          writeln("In 3rd EdgeAttr:")
+          writeln(data)
           dotScript = dotScript .. "  edge [" .. data .. "];\n"
       )
     )
@@ -272,6 +294,122 @@ IoGraphViz := Object clone do(
     if(self format != "none",
       # Save script and send it to dot
       t := File openForUpdating("./temp.dot") # TODO TemporaryFile
+      #t remove
+      #t := File openForUpdating("./temp.dot")
+      t write(dotScript)
+      # TODO change this when Temporary file
+      t close
+      
+      # TODO implements findExecutable()
+      cmd := "\"C:/Program Files/Graphviz2.18/Bin/dot\""
+      
+      phyl := ""
+      phyl = if(fileName isNil == false, "-o " .. fileName)
+      xCmd := cmd .. " -T" .. format .. " " .. phyl .. " " .. t path
+      System system(xCmd) #println
+      
+      
+      # Clean file
+      #t close
+    ,
+      dotScript print
+    )
+  )
+  
+  #####################################################################################################
+  output := method(options,
+    dotScript := "" asMutable
+    
+    # Open graph
+    dotScript appendSeq(graphType .. " " .. self graphName .. " {\n")
+    if(attrGraph keys size > 0,
+      nil
+    )
+    
+    # Write graph attr
+    attrGraph foreach(att, val,
+      dotScript appendSeq("  #{att} = \"#{val}\";\n" interpolate)
+    )
+    
+    # Write node attr
+    dotScript appendSeq("  node [")
+    sep := ""
+    self attrNode foreach(att, val,
+      dotScript appendSeq("#{sep}#{att} = \"#{val}\"" interpolate)
+      sep = ", "
+    )
+    dotScript appendSeq("];\n")
+    
+    # Write edge attr
+    dotScript appendSeq("  edge [")
+    sep := ""
+    self attrEdge foreach(att, val,
+      dotScript appendSeq("#{sep}#{att} = \"#{val}\"" interpolate)
+      sep = ", "
+    )
+    dotScript appendSeq("];\n")
+    
+    dotScript appendSeq("\n")
+    
+    # Write nodes
+    # TODO use Node outpoutNode
+    nodes foreach(nam, nod,
+      dotScript appendSeq("  " .. nam)
+      if(nod attrNode size > 0, dotScript appendSeq(" ["))
+      sep := ""
+      nod attrNode foreach(att, val,
+        dotScript appendSeq("#{sep}#{att} = \"#{val}\"" interpolate)
+        sep = ", "
+      )
+      if(nod attrNode size > 0, dotScript appendSeq("]"))
+      dotScript appendSeq(";\n")
+    )
+    
+    dotScript appendSeq("\n")
+    
+    # Write edges
+    edges foreach(edg,
+      dotScript appendSeq("  " .. edg outputEdge(graphType) .. "\n")
+    )
+    
+    
+    # Close graph
+    dotScript appendSeq("}")
+    
+    if(parentGraph isNil == false,
+      # Case subgraph
+      dotScript = "subgraph " .. self graphName .. " {\n" .. dotScript
+      return(dotScript)
+      dotScript
+    ,
+      if(options isNil == false,
+        options foreach(k, v,
+          k switch(
+            "output",
+              if(Constants Formats contains(v) == false,
+                Exception raise("Output format " .. v .. " is invalid")
+              )
+              format = v,
+            "file",
+              fileName = v,
+            "use",
+              if(Programs contains(v) == false,
+                Exception raise("Can't use '" .. v .. "'")
+              )
+              prog = v,
+            "path",
+              path = v,
+            # DEFAULT
+              Exception raise("Option '" .. v .. "' unknow" )
+          )
+        )
+      )
+    )
+  
+    if(format != "none",
+      # Save script and send it to dot
+      t := File openForUpdating("./temp.dot") # TODO TemporaryFile
+      #t remove
       #t := File openForUpdating("./temp.dot")
       t write(dotScript)
       # TODO change this when Temporary file
