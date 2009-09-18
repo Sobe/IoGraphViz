@@ -3,7 +3,7 @@ doRelativeFile("attr.io")
 Edge := Object clone do(
   nodeFrom := nil
   nodeTo := nil
-  attrEdge := EdgeAttr clone
+  attrEdge := nil
   parentGraph := nil
   
   setAttribute := method(attribute, value,
@@ -18,6 +18,7 @@ Edge := Object clone do(
     nodeFrom = from
     nodeTo = to
     parentGraph = parent
+    attrEdge = EdgeAttr clone
     self
   )
   
@@ -28,7 +29,7 @@ Edge := Object clone do(
     out := nodeFrom name .. link .. nodeTo name
     attr := ""
     separator := ""
-    attrEdge foreach(k, v,
+    self attrEdge foreach(k, v,
       attr = attr .. separator .. k .. " = \"" .. v .. "\""
       separator = ", "
     )
