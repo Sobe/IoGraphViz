@@ -20,12 +20,12 @@ IoGraphViz := Object clone do(
   parentGraph := nil
   graphType := "digraph"
   
-  elements := list()
   
   # TODO see if these containers are OK
-  nodes := Map clone
-  edges := list()
-  graphs := Map clone
+  nodes := nil
+  edges := nil
+  graphs := nil
+
   # Ruby version:
   #~ @hoNodes  = Hash::new()
   #~ @loEdges  = Array::new()
@@ -39,44 +39,44 @@ IoGraphViz := Object clone do(
   attrEdge := nil
   
   with := method(name,
-    graphName = name
-    attrGraph = GraphAttr clone
-    attrNode = NodeAttr clone
-    attrEdge = EdgeAttr clone
-    self
+    self graphName = name
+    self attrGraph = GraphAttr clone
+    self attrNode = NodeAttr clone
+    self attrEdge = EdgeAttr clone
+    self nodes := Map clone
+    self edges := list()
+    self graphs := Map clone
+    return self
   )
   
   #
   # Accessors for graphes attributes
   #
   setAttribute := method(attribute, value,
-    attrGraph atPut(attribute, value)
-    elements append(GraphAttr clone with(attribute, value))
+    self attrGraph atPut(attribute, value)
   )
   attributeAt := method(attribute,
-    attrGraph at(attribute)
+    self attrGraph at(attribute)
   )
   
   #
   # Accessors for nodes attributes
   #
   setNodeAttr := method(attribute, value,
-    attrNode atPut(attribute, value)
-    elements append(NodeAttr clone with(attribute, value))
+    self attrNode atPut(attribute, value)
   )
   nodeAttrAt := method(attribute,
-    attrNode at(attribute)
+    self attrNode at(attribute)
   )
 
   #
   # Accessors for edges attributes
   #
   setEdgeAttr:= method(attribute, value,
-    attrEdge atPut(attribute, value)
-    elements append(EdgeAttr clone with(attribute, value))
+    self attrEdge atPut(attribute, value)
   )
   edgeAttrAt := method(attribute,
-    attrEdge at(attribute)
+    self attrEdge at(attribute)
   )
   
   
@@ -92,8 +92,7 @@ IoGraphViz := Object clone do(
       )
     )
     
-    nodes atPut(newNode name, newNode)
-    elements append(newNode)
+    self nodes atPut(newNode name, newNode)
     newNode
   )
   
@@ -129,13 +128,12 @@ IoGraphViz := Object clone do(
           )
         )
         addedEdges append(newEdge)
-        edges append(newEdge)
-        elements append(newEdge)
+        self edges append(newEdge)
         
       )
     )
     
-    return(addedEdges)
+    return addedEdges
   )
   
   #
@@ -146,25 +144,30 @@ IoGraphViz := Object clone do(
   #
   addGraph := method(gName, gOptions,
     newGraph := IoGraphViz clone with(gName)
-    graphs atPut(gName, newGraph)
-    elements append(newGraph)
+    newGraph parentGraph = self
+    self graphs atPut(gName, newGraph)
     
-    gOptions foreach(k, v,
+    gOptions ?foreach(k, v,
       newGraph setAttribute(k, v)
     )
     
-    newGraph
+    return newGraph
   )
   
   #
   # Number of nodes
   #
-  nodesCount := method(nodes size)
+  nodesCount := method(self nodes size)
   
   #
   # Number of edges
   #
-  edgesCount := method(edges size)
+  edgesCount := method(self edges size)
+  
+  #
+  # Number of subgraphs
+  #
+  graphsCount := method(self graphs size)
   
   #
   # Generate the graph
@@ -175,147 +178,6 @@ IoGraphViz := Object clone do(
   #   'use'     => GraphViz program to use
   #   'path'    => program path
   #
-  # NOT FUNCTIONAL
-  outputFromRuby := method(options,
-    dotScript := "" # TODO asMutable
-    lastType := nil
-    separator := ""
-    data := ""
-    
-    writeln("attrNode:")
-    writeln(attrNode keys)
-    writeln("attrEdge:")
-    writeln(attrEdge keys)
-    writeln("In elements:")
-    elements foreach(elt, writeln(elt type))
-    
-    elements foreach(elt,
-      if((lastType isNil) or (lastType != elt type),
-        
-        if(data size > 0,
-          lastType switch(
-            "GraphAttr",
-              dotScript = dotScript .. "  " .. data .. ";\n"
-            "NodeAttr",
-              writeln("In 1st NodeAttr:")
-              writeln(data)
-              dotScript = dotScript .. "  node [" .. data .. "];\n",
-            "EdgeAttr",
-              writeln("In 1st EdgeAttr:")
-              writeln(data)
-              dotScript = dotScript .. "  edge [" .. data .. "];\n"
-          )
-        )
-        
-        separator = ""
-        data = ""
-      )
-      
-      lastType = elt type
-      
-      # Check element is non nil
-      if(elt isNil, Exception raise("Found empty element."))
-
-      elt type switch(
-        # TODO Refactor here
-        "GraphAttr",
-          data = data .. separator .. elt keys at(0) .. " = \"" .. elt at(elt keys at(0)) .. "\""
-          separator = "; ",
-        "NodeAttr",
-          writeln("In 2nd NodeAttr:")
-          writeln(data)
-          data = data .. separator .. elt keys at(0) .. " = \"" .. elt at(elt keys at(0)) .. "\""
-          separator = ", ",
-        "EdgeAttr",
-          writeln("In 2nd EdgeAttr:")
-          writeln(data)
-          data = data .. separator .. elt keys at(0) .. " = \"" .. elt at(elt keys at(0)) .. "\""
-          separator = ", ",
-        "Node",
-          dotScript = dotScript .. "  " .. elt outputNode() .. "\n",
-        "Edge",
-          dotScript = dotScript .. "  " .. elt outputEdge(graphType) .. "\n",
-        "IoGraphViz",
-          dotScript = dotScript .. "  " .. elt output() .. "\n",
-        # ELSE
-          Exception raise("Unknow element type: " .. elt type)
-      )
-    )
-    
-    if(data size > 0,
-      lastType switch(
-        "GraphAttr",
-          dotScript = dotScript .. "  " .. data .. ";\n",
-        "NodeAttr",
-          writeln("In 3rd NodeAttr:")
-          writeln(data)
-          dotScript = dotScript .. "  node [" .. data .. "];\n",
-        "EdgeAttr",
-          writeln("In 3rd EdgeAttr:")
-          writeln(data)
-          dotScript = dotScript .. "  edge [" .. data .. "];\n"
-      )
-    )
-    dotScript = dotScript .. "}"
-    
-    if(parentGraph isNil == false,
-      # Case subgraph
-      dotScript = "subgraph " .. self graphName .. " {\n" .. dotScript
-      return(dotScript)
-      dotScript
-    ,
-      if(options isNil == false,
-        options foreach(k, v,
-          k switch(
-            "output",
-              if(Constants Formats contains(v) == false,
-                Exception raise("Output format " .. v .. " is invalid")
-              )
-              format = v,
-            "file",
-              fileName = v,
-            "use",
-              if(Programs contains(v) == false,
-                Exception raise("Can't use '" .. v .. "'")
-              )
-              prog = v,
-            "path",
-              path = v,
-            # DEFAULT
-              Exception raise("Option '" .. v .. "' unknow" )
-          )
-        )
-      )
-    )
-    
-    dotScript = graphType .. " " .. self graphName .. " {\n" .. dotScript
-    
-    if(self format != "none",
-      # Save script and send it to dot
-      t := File openForUpdating("./temp.dot") # TODO TemporaryFile
-      #t remove
-      #t := File openForUpdating("./temp.dot")
-      t write(dotScript)
-      # TODO change this when Temporary file
-      t close
-      
-      # TODO implements findExecutable()
-      cmd := "\"C:/Program Files/Graphviz2.18/Bin/dot\""
-      
-      phyl := ""
-      phyl = if(fileName isNil == false, "-o " .. fileName)
-      xCmd := cmd .. " -T" .. format .. " " .. phyl .. " " .. t path
-      System system(xCmd) #println
-      
-      
-      # Clean file
-      #t close
-    ,
-      dotScript print
-    )
-  )
-  
-  #####################################################################################################
   output := method(options,
     dotScript := "" asMutable
     
@@ -325,13 +187,9 @@ IoGraphViz := Object clone do(
     ,
       dotScript appendSeq("subgraph " .. self graphName .. " {\n")
     )
-
-    if(attrGraph keys size > 0,
-      nil
-    )
     
     # Write graph attr
-    attrGraph foreach(att, val,
+    self attrGraph foreach(att, val,
       dotScript appendSeq("  #{att} = \"#{val}\";\n" interpolate)
     )
     
@@ -356,13 +214,14 @@ IoGraphViz := Object clone do(
     dotScript appendSeq("\n")
     
     # Write graphs
-    graphs foreach(nam, grph,
-      dotScript appendSeq(grph output(options))
+    self graphs foreach(nam, grph,
+      dotScript appendSeq(grph output(nil))
+      dotScript appendSeq("\n")
     )
     
     # Write nodes
     # TODO use Node outpoutNode
-    nodes foreach(nam, nod,
+    self nodes foreach(nam, nod,
       dotScript appendSeq("  " .. nam)
       if(nod attrNode size > 0, dotScript appendSeq(" ["))
       sep := ""
@@ -377,7 +236,7 @@ IoGraphViz := Object clone do(
     dotScript appendSeq("\n")
     
     # Write edges
-    edges foreach(edg,
+    self edges foreach(edg,
       dotScript appendSeq("  " .. edg outputEdge(graphType) .. "\n")
     )
     
@@ -385,9 +244,8 @@ IoGraphViz := Object clone do(
     # Close graph
     dotScript appendSeq("}")
     
-    if(parentGraph isNil == false,
+    if(self parentGraph isNil == false,
       # Case subgraph
-      dotScript = "subgraph " .. self graphName .. " {\n" .. dotScript
       return(dotScript)
       dotScript
     ,
@@ -424,7 +282,7 @@ IoGraphViz := Object clone do(
       # TODO change this when Temporary file
       t close
       
-      # TODO implements findExecutable()
+      # TODO implements findExecutable() OR use a config file (easier ?)
       cmd := "\"C:/Program Files/Graphviz2.18/Bin/dot\""
       
       phyl := ""
