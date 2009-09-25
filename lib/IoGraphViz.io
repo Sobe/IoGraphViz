@@ -1,16 +1,15 @@
 # Some kind of big license should be here
 
-Node
-Edge
-Constants
-doRelativeFile("attr.io")
-
-
-
 #
 # TODO Comment
 #
 IoGraphViz := Object clone do(
+  
+  # Required protos and files
+  Node
+  Edge
+  Constants
+  doRelativeFile("attr.io")
   
   graphName := "G"
   fileName := "out"
@@ -320,8 +319,13 @@ IoGraphViz := Object clone do(
   output := method(options,
     dotScript := "" asMutable
     
-    # Open graph
-    dotScript appendSeq(graphType .. " " .. self graphName .. " {\n")
+    # Open graph (or subgraph)
+    if(self parentGraph isNil,
+      dotScript appendSeq(graphType .. " " .. self graphName .. " {\n")
+    ,
+      dotScript appendSeq("subgraph " .. self graphName .. " {\n")
+    )
+
     if(attrGraph keys size > 0,
       nil
     )
@@ -350,6 +354,11 @@ IoGraphViz := Object clone do(
     dotScript appendSeq("];\n")
     
     dotScript appendSeq("\n")
+    
+    # Write graphs
+    graphs foreach(nam, grph,
+      dotScript appendSeq(grph output(options))
+    )
     
     # Write nodes
     # TODO use Node outpoutNode
