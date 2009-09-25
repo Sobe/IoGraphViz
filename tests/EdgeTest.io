@@ -3,10 +3,9 @@ Edge
 EdgeTest := UnitTest clone do(
 
 	testSetAttribute := method(
-    nod := Edge clone
-    nod setAttribute("attr", 42)
-		assertEquals(nod attributeAt("attr"), 
-                 Edge  clone do(attrEdge atPut("attr", 42)) attributeAt("attr"))
+    edg := Edge clone with(Node clone, Node clone, nil)
+    edg setAttribute("attr", 42)
+		assertEquals(edg attributeAt("attr"), 42)
 	)
   
 )
