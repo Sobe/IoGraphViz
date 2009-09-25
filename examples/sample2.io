@@ -1,7 +1,5 @@
 IoGraphViz
 
-"BEGINING OF SAMPLE2" println
-
 gv := IoGraphViz clone with("A_Program")
 
 gv setNodeAttr("shape", "ellipse")
@@ -47,5 +45,3 @@ options := Map clone do(
 )
 
 gv output(options)
-
-"END OF SAMPLE2" println

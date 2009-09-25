@@ -1,7 +1,5 @@
 IoGraphViz
 
-"BEGINING OF SAMPLE1" println
-
 gv := IoGraphViz clone with("G")
 
 main := gv addNode("main", nil)
@@ -29,5 +27,3 @@ options := Map clone do(
 )
 
 gv output(options)
-
-"END OF SAMPLE1" print
