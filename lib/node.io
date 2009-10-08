@@ -39,7 +39,9 @@ Node := Object clone do(
   )
   
   
-  
+  #
+  # Output node in DOT formated string
+  #
   outputNode := method(
     out := "" .. name
     attr := ""
