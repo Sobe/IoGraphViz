@@ -20,8 +20,6 @@ IoGraphViz := Object clone do(
   parentGraph := nil
   graphType := "digraph"
   
-  
-  # TODO see if these containers are OK
   nodes := nil
   edges := nil
   graphs := nil
@@ -221,16 +219,19 @@ IoGraphViz := Object clone do(
     
     # Write nodes
     # TODO use Node outpoutNode
+    #~ self nodes foreach(nam, nod,
+      #~ dotScript appendSeq("  " .. nam)
+      #~ if(nod attrNode size > 0, dotScript appendSeq(" ["))
+      #~ sep := ""
+      #~ nod attrNode foreach(att, val,
+        #~ dotScript appendSeq("#{sep}#{att} = \"#{val}\"" interpolate)
+        #~ sep = ", "
+      #~ )
+      #~ if(nod attrNode size > 0, dotScript appendSeq("]"))
+      #~ dotScript appendSeq(";\n")
+    #~ )
     self nodes foreach(nam, nod,
-      dotScript appendSeq("  " .. nam)
-      if(nod attrNode size > 0, dotScript appendSeq(" ["))
-      sep := ""
-      nod attrNode foreach(att, val,
-        dotScript appendSeq("#{sep}#{att} = \"#{val}\"" interpolate)
-        sep = ", "
-      )
-      if(nod attrNode size > 0, dotScript appendSeq("]"))
-      dotScript appendSeq(";\n")
+      dotScript appendSeq("  " .. nod outputNode .. "\n")
     )
     
     dotScript appendSeq("\n")
@@ -276,8 +277,6 @@ IoGraphViz := Object clone do(
     if(format != "none",
       # Save script and send it to dot
       t := File openForUpdating("./temp.dot") # TODO TemporaryFile
-      #t remove
-      #t := File openForUpdating("./temp.dot")
       t write(dotScript)
       # TODO change this when Temporary file
       t close
