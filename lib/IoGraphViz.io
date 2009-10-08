@@ -218,18 +218,6 @@ IoGraphViz := Object clone do(
     )
     
     # Write nodes
-    # TODO use Node outpoutNode
-    #~ self nodes foreach(nam, nod,
-      #~ dotScript appendSeq("  " .. nam)
-      #~ if(nod attrNode size > 0, dotScript appendSeq(" ["))
-      #~ sep := ""
-      #~ nod attrNode foreach(att, val,
-        #~ dotScript appendSeq("#{sep}#{att} = \"#{val}\"" interpolate)
-        #~ sep = ", "
-      #~ )
-      #~ if(nod attrNode size > 0, dotScript appendSeq("]"))
-      #~ dotScript appendSeq(";\n")
-    #~ )
     self nodes foreach(nam, nod,
       dotScript appendSeq("  " .. nod outputNode .. "\n")
     )
