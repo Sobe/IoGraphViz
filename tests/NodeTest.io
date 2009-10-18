@@ -1,5 +1,6 @@
 Node
 
+# Tests for Node proto
 NodeTest := UnitTest clone do(
 
 	testSetAttribute := method(

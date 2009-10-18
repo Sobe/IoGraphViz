@@ -1,5 +1,6 @@
 Edge
 
+# Tests for Edge proto
 EdgeTest := UnitTest clone do(
 
 	testSetAttribute := method(

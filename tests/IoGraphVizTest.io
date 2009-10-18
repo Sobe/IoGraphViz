@@ -1,5 +1,6 @@
 IoGraphViz
 
+# Tests for IoGraphViz proto
 IoGraphVizTest := UnitTest clone do(
   
   verbose
