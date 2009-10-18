@@ -1,4 +1,4 @@
-# Some kind of big license should be here
+# TODO Some kind of big license should be here (GPL)
 
 #
 # TODO Comment
@@ -6,10 +6,11 @@
 IoGraphViz := Object clone do(
   
   # Required protos and files
-  Node
-  Edge
-  Constants
   doRelativeFile("attr.io")
+  doRelativeFile("node.io")
+  doRelativeFile("edge.io")
+  doRelativeFile("constants.io")
+  
   
   graphName := "G"
   fileName := "out"
@@ -24,14 +25,6 @@ IoGraphViz := Object clone do(
   edges := nil
   graphs := nil
 
-  # Ruby version:
-  #~ @hoNodes  = Hash::new()
-  #~ @loEdges  = Array::new()
-  #~ @hoGraphs = Hash::new()
-    
-  #~ @node  = GraphViz::Attrs::new( self, "node",  NODESATTRS  )
-  #~ @edge  = GraphViz::Attrs::new( self, "edge",  EDGESATTRS  )
-  #~ @graph = GraphViz::Attrs::new( self, "graph", GRAPHSATTRS )
   attrGraph := nil
   attrNode := nil
   attrEdge := nil
@@ -264,18 +257,25 @@ IoGraphViz := Object clone do(
   
     if(format != "none",
       # Save script and send it to dot
-      t := File openForUpdating("./temp.dot") # TODO TemporaryFile
+      t := File openForUpdating("./temp.gv") # TODO TemporaryFile
       t write(dotScript)
-      # TODO change this when Temporary file
+      # TODO change this when Temporary file (temp is destroyed when closed)
       t close
       
       # TODO implements findExecutable() OR use a config file (easier ?)
-      cmd := "\"C:/Program Files/Graphviz2.18/Bin/dot\""
+      config := doRelativeFile("../config.io")
+      cmd := config at("cmdPath") asMutable
+      if(cmd slice(-2) == "/\"",
+        cmd = cmd slice(0, -1) .. prog .. "\""
+      ,
+        cmd appendSeq(prog)
+      )
       
       phyl := ""
       phyl = if(fileName isNil == false, "-o " .. fileName)
       xCmd := cmd .. " -T" .. format .. " " .. phyl .. " " .. t path
-      System system(xCmd) #println
+      xCmd println
+      System system(xCmd)
       
       
       # Clean file
