@@ -1,3 +1,5 @@
+# TODO License
+
 doRelativeFile("attr.io")
 
 Edge := Object clone do(
@@ -18,7 +20,7 @@ Edge := Object clone do(
     nodeFrom = from
     nodeTo = to
     parentGraph = parent
-    attrEdge = EdgeAttr clone
+    attrEdge = IoGraphViz EdgeAttr clone
     self
   )
   

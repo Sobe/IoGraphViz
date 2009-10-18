@@ -1,3 +1,5 @@
+# TODO License
+
 doRelativeFile("attr.io")
 
 Node := Object clone do(
@@ -34,7 +36,7 @@ Node := Object clone do(
   with := method(nam, parent,
     name = nam
     parentGraph = parent
-    attrNode = NodeAttr clone
+    attrNode = IoGraphViz NodeAttr clone
     self
   )
   

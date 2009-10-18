@@ -1,4 +1,7 @@
+# TODO License
+
 # Constants from GraphViz
+# See documentation at http://www.graphviz.org/ for more informations.
 
 Constants := Object clone do(
   Formats := list(

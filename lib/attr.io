@@ -1,3 +1,5 @@
+# TODO License
+
 ProtoAttr := Map clone do(
   
   name := nil
